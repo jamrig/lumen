@@ -1,6 +1,9 @@
 package lumen
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Vec3 struct {
 	X float64
@@ -14,6 +17,10 @@ func NewVec3(x, y, z float64) Vec3 {
 		Y: y,
 		Z: z,
 	}
+}
+
+func (v Vec3) String() string {
+	return fmt.Sprintf("Vec3(%v, %v, %v)", v.X, v.Y, v.Z)
 }
 
 func (v Vec3) Add(u Vec3) Vec3 {
