@@ -105,3 +105,10 @@ func (v Vec3) NearZero() bool {
 func (v Vec3) Reflect(n Vec3) Vec3 {
 	return v.Sub(n.Mul(2 * v.Dot(n)))
 }
+
+func (v Vec3) Refract(n Vec3, refractionIndex float64) Vec3 {
+	cosTheta := math.Min(v.Mul(-1).Dot(n), 1)
+	rOutPerp := v.Add(n.Mul(cosTheta)).Mul(refractionIndex)
+	rOutParallel := n.Mul(-math.Sqrt(math.Abs(1 - rOutPerp.LengthSquared())))
+	return rOutPerp.Add(rOutParallel)
+}

@@ -19,7 +19,7 @@ func main() {
 	// materials
 	materialGround := material.NewLambertianMaterial(maths.NewColor(0.8, 0.8, 0.0))
 	materialCenter := material.NewLambertianMaterial(maths.NewColor(0.1, 0.2, 0.5))
-	materialLeft := material.NewMetalMaterial(maths.NewColor(0.8, 0.8, 0.8), 0.3)
+	materialLeft := material.NewDielectricMaterial(1.00 / 1.33)
 	materialRight := material.NewMetalMaterial(maths.NewColor(0.8, 0.6, 0.2), 1.0)
 
 	// scene
