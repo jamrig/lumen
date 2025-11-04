@@ -60,3 +60,11 @@ func (c Color) Div(t float64) Color {
 		B: c.B / t,
 	}
 }
+
+func (c Color) Attenuate(a Color) Color {
+	return Color{
+		R: c.R * a.R,
+		G: c.G * a.G,
+		B: c.B * a.B,
+	}
+}

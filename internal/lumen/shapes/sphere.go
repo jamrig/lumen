@@ -3,22 +3,25 @@ package shapes
 import (
 	"math"
 
+	"github.com/jamrig/lumen/internal/lumen/material"
 	"github.com/jamrig/lumen/internal/lumen/maths"
 )
 
 type Sphere struct {
-	Origin maths.Vec3
-	Radius float64
+	Origin   maths.Vec3
+	Radius   float64
+	Material material.Material
 }
 
-func NewSphere(origin maths.Vec3, radius float64) Sphere {
+func NewSphere(origin maths.Vec3, radius float64, mat material.Material) Sphere {
 	return Sphere{
-		Origin: origin,
-		Radius: radius,
+		Origin:   origin,
+		Radius:   radius,
+		Material: mat,
 	}
 }
 
-func (s Sphere) Hit(r maths.Ray, t maths.Interval) *maths.Intersection {
+func (s Sphere) Hit(r maths.Ray, t maths.Interval) *HitResult {
 	oc := s.Origin.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
 	h := r.Direction.Dot(oc)
@@ -40,7 +43,9 @@ func (s Sphere) Hit(r maths.Ray, t maths.Interval) *maths.Intersection {
 	}
 
 	p := r.At(root)
-	hit := maths.NewIntersection(r, p, root, p.Sub(s.Origin).Div(s.Radius))
 
-	return &hit
+	return NewHitResult(
+		maths.NewIntersection(r, p, root, p.Sub(s.Origin).Div(s.Radius)),
+		s.Material,
+	)
 }

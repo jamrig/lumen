@@ -21,16 +21,16 @@ func (s *Scene) Add(object shapes.Hittable) {
 	s.Objects = append(s.Objects, object)
 }
 
-func (s *Scene) Hit(r maths.Ray, t maths.Interval) *maths.Intersection {
+func (s *Scene) Hit(r maths.Ray, t maths.Interval) *shapes.HitResult {
 	closest := maths.NewInterval(t.Min, t.Max)
-	var hit *maths.Intersection
+	var res *shapes.HitResult
 
 	for _, obj := range s.Objects {
-		if newHit := obj.Hit(r, closest); newHit != nil {
-			hit = newHit
-			closest.Max = hit.T
+		if newRes := obj.Hit(r, closest); newRes != nil {
+			res = newRes
+			closest.Max = res.Intersection.T
 		}
 	}
 
-	return hit
+	return res
 }

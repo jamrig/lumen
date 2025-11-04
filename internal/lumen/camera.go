@@ -12,7 +12,7 @@ const aspectRatio = 16.0 / 9.0
 const imageWidth = 1000
 const viewportHeight = 2.0
 const focalLength = 1.0
-const samplesPerPixel = 10
+const samplesPerPixel = 100
 const maxDepth = 50
 const intersectionThreshold = 0.001
 
@@ -87,9 +87,12 @@ func (c *Camera) GetRayColor(r maths.Ray, scene *Scene, depth int) maths.Color {
 		return maths.NewColor(0, 0, 0)
 	}
 
-	if hit := scene.Hit(r, maths.NewInterval(intersectionThreshold, math.Inf(1))); hit != nil {
-		bounceDirection := hit.Normal.Add(maths.NewRandomUnitVec3())
-		return c.GetRayColor(maths.NewRay(hit.Point, bounceDirection), scene, depth-1).Mul(0.5)
+	if res := scene.Hit(r, maths.NewInterval(intersectionThreshold, math.Inf(1))); res != nil {
+		if scatterRay := res.Material.Scatter(&res.Intersection); scatterRay != nil {
+			return c.GetRayColor(scatterRay.Ray, scene, depth-1).Attenuate(scatterRay.Attenuation)
+		}
+
+		return maths.NewColor(0, 0, 0)
 	}
 
 	a := 0.5 * (r.Direction.Y + 1.0)
