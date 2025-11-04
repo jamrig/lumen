@@ -1,0 +1,35 @@
+package lumen
+
+import "math"
+
+type Interval struct {
+	Min float64
+	Max float64
+}
+
+func NewInterval(min, max float64) Interval {
+	return Interval{
+		Min: min,
+		Max: max,
+	}
+}
+
+func NewEmptyInterval() Interval {
+	return NewInterval(math.Inf(1), math.Inf(-1))
+}
+
+func NewUniverseInterval() Interval {
+	return NewInterval(math.Inf(-1), math.Inf(1))
+}
+
+func (i *Interval) Size() float64 {
+	return i.Max - i.Min
+}
+
+func (i *Interval) Contains(n float64) bool {
+	return i.Min <= n && n <= i.Max
+}
+
+func (i *Interval) Surrounds(n float64) bool {
+	return i.Min < n && n < i.Max
+}

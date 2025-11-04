@@ -18,7 +18,7 @@ func NewSphere(origin Vec3, radius float64) Sphere {
 	}
 }
 
-func (s Sphere) Hit(r Ray, tMin, tMax float64) *HitRecord {
+func (s Sphere) Hit(r Ray, t Interval) *HitRecord {
 	oc := s.Origin.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
 	h := r.Direction.Dot(oc)
@@ -31,9 +31,10 @@ func (s Sphere) Hit(r Ray, tMin, tMax float64) *HitRecord {
 
 	sqrtD := math.Sqrt(discriminant)
 	root := (h - sqrtD) / a
-	if root <= tMin || root >= tMax {
+
+	if !t.Surrounds(root) {
 		root = (h + sqrtD) / a
-		if root <= tMin || root >= tMax {
+		if !t.Surrounds(root) {
 			return nil
 		}
 	}

@@ -23,7 +23,7 @@ func NewHitRecord(p Vec3, t float64, r Ray, outwardNormal Vec3) *HitRecord {
 }
 
 type Hittable interface {
-	Hit(r Ray, tMin, tMax float64) *HitRecord
+	Hit(r Ray, t Interval) *HitRecord
 }
 
 type HittableList struct {
@@ -42,14 +42,14 @@ func (h *HittableList) Add(object Hittable) {
 	h.Objects = append(h.Objects, object)
 }
 
-func (h *HittableList) Hit(r Ray, tMin, tMax float64) *HitRecord {
-	closestSoFar := tMax
+func (h *HittableList) Hit(r Ray, t Interval) *HitRecord {
+	closest := NewInterval(t.Min, t.Max)
 	var record *HitRecord
 
 	for _, obj := range h.Objects {
-		if newRecord := obj.Hit(r, tMin, closestSoFar); newRecord != nil {
+		if newRecord := obj.Hit(r, closest); newRecord != nil {
 			record = newRecord
-			closestSoFar = record.T
+			closest.Max = record.T
 		}
 	}
 

@@ -47,7 +47,7 @@ func (c *Camera) ColorAtPixel(screenX, screenY int, world HittableList) color.RG
 	rayDirection := pixelCenter.Sub(c.Origin).Unit()
 	ray := NewRay(c.Origin, rayDirection)
 
-	if record := world.Hit(ray, 0, math.Inf(1)); record != nil {
+	if record := world.Hit(ray, NewInterval(0, math.Inf(1))); record != nil {
 		return NewVec3(1, 1, 1).Add(record.Normal).Mul(0.5).ToRGBA()
 	}
 
