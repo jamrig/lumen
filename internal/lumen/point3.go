@@ -20,18 +20,18 @@ func (p Point3) String() string {
 	return fmt.Sprintf("Point3(%v, %v, %v)", p.X, p.Y, p.Z)
 }
 
-func (p Point3) Add(q Point3) Point3 {
+func (p Point3) Add(v Vec3) Point3 {
 	return Point3{
-		X: p.X + q.X,
-		Y: p.Y + q.Y,
-		Z: p.Z + q.Z,
+		X: p.X + v.X,
+		Y: p.Y + v.Y,
+		Z: p.Z + v.Z,
 	}
 }
 
-func (p Point3) Sub(q Point3) Point3 {
+func (p Point3) Sub(v Vec3) Point3 {
 	return Point3{
-		X: p.X - q.X,
-		Y: p.Y - q.Y,
-		Z: p.Z - q.Z,
+		X: p.X - v.X,
+		Y: p.Y - v.Y,
+		Z: p.Z - v.Z,
 	}
 }
