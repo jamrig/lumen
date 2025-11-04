@@ -16,3 +16,7 @@ func LinearToGamma(linearComponent float64) float64 {
 
 	return 0
 }
+
+func DegreesToRadians(degrees float64) float64 {
+	return degrees * math.Pi / 180.0
+}

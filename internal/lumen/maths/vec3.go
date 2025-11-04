@@ -79,9 +79,9 @@ func (v Vec3) Dot(u Vec3) float64 {
 
 func (v Vec3) Cross(u Vec3) Vec3 {
 	return NewVec3(
-		v.Z*u.Y-v.Y*u.Z,
-		v.X*u.Z-v.X*u.Z,
-		v.Y*u.X-v.X*u.Y,
+		v.Y*u.Z-v.Z*u.Y,
+		v.Z*u.X-v.X*u.Z,
+		v.X*u.Y-v.Y*u.X,
 	)
 }
 

@@ -19,7 +19,8 @@ func main() {
 	// materials
 	materialGround := material.NewLambertianMaterial(maths.NewColor(0.8, 0.8, 0.0))
 	materialCenter := material.NewLambertianMaterial(maths.NewColor(0.1, 0.2, 0.5))
-	materialLeft := material.NewDielectricMaterial(1.00 / 1.33)
+	materialLeft := material.NewDielectricMaterial(1.5)
+	materialBubble := material.NewDielectricMaterial(1.00 / 1.5)
 	materialRight := material.NewMetalMaterial(maths.NewColor(0.8, 0.6, 0.2), 1.0)
 
 	// scene
@@ -27,6 +28,7 @@ func main() {
 	scene.Add(shapes.NewSphere(maths.NewVec3(0.0, -100.5, -1.0), 100, materialGround))
 	scene.Add(shapes.NewSphere(maths.NewVec3(0.0, 0.0, -1.2), 0.5, materialCenter))
 	scene.Add(shapes.NewSphere(maths.NewVec3(-1.0, 0.0, -1.0), 0.5, materialLeft))
+	scene.Add(shapes.NewSphere(maths.NewVec3(-1.0, 0.0, -1.0), 0.4, materialBubble))
 	scene.Add(shapes.NewSphere(maths.NewVec3(1.0, 0.0, -1.0), 0.5, materialRight))
 
 	startTime := time.Now()
