@@ -1,7 +1,9 @@
 package lumen
 
 import (
+	"encoding/json"
 	"fmt"
+	"image/color"
 	"math"
 )
 
@@ -20,7 +22,21 @@ func NewVec3(x, y, z float64) Vec3 {
 }
 
 func (v Vec3) String() string {
-	return fmt.Sprintf("Vec3(%v, %v, %v)", v.X, v.Y, v.Z)
+	pretty, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("[ERR] Failed to stringify Vec3: %v", err)
+	}
+
+	return fmt.Sprintf("Vec3: %v", string(pretty))
+}
+
+func (v Vec3) ToRGBA() color.RGBA {
+	return color.RGBA{
+		R: uint8(v.X * 255),
+		G: uint8(v.Y * 255),
+		B: uint8(v.Z * 255),
+		A: 255,
+	}
 }
 
 func (v Vec3) Add(u Vec3) Vec3 {
