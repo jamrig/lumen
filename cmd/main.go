@@ -14,7 +14,7 @@ import (
 func main() {
 
 	aspectRatio := 16.0 / 9.0
-	imageWidth := 400
+	imageWidth := 1920
 	imageHeight := int(math.Floor(float64(imageWidth) / aspectRatio))
 
 	camera := lumen.NewCamera(lumen.NewVec3(0, 0, 0), 1, 2.0*(float64(imageWidth)/float64(imageHeight)), 2.0, imageWidth, imageHeight)
