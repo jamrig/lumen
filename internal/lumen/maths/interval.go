@@ -1,8 +1,6 @@
-package lumen
+package maths
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 )
 
@@ -24,11 +22,6 @@ func NewEmptyInterval() Interval {
 
 func NewUniverseInterval() Interval {
 	return NewInterval(math.Inf(-1), math.Inf(1))
-}
-
-func (i Interval) String() string {
-	pretty, _ := json.MarshalIndent(i, "", "  ")
-	return fmt.Sprintf("Interval: %v", string(pretty))
 }
 
 func (i Interval) Size() float64 {

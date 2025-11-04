@@ -1,9 +1,6 @@
-package lumen
+package maths
 
 import (
-	"encoding/json"
-	"fmt"
-	"image/color"
 	"math"
 )
 
@@ -42,22 +39,6 @@ func NewRandomUnitVec3OnHemisphere(normal Vec3) Vec3 {
 	}
 
 	return v.Mul(-1)
-}
-
-func (v Vec3) String() string {
-	pretty, _ := json.MarshalIndent(v, "", "  ")
-	return fmt.Sprintf("Vec3: %v", string(pretty))
-}
-
-func (v Vec3) ToRGBA() color.RGBA {
-	intensity := NewInterval(0.000, 0.999)
-
-	return color.RGBA{
-		R: uint8(intensity.Clamp(v.X) * 256),
-		G: uint8(intensity.Clamp(v.Y) * 256),
-		B: uint8(intensity.Clamp(v.Z) * 256),
-		A: 255,
-	}
 }
 
 func (v Vec3) Add(u Vec3) Vec3 {
@@ -114,4 +95,13 @@ func (v Vec3) Length() float64 {
 
 func (v Vec3) Unit() Vec3 {
 	return v.Div(v.Length())
+}
+
+func (v Vec3) NearZero() bool {
+	threshold := 1e-8
+	return v.X < threshold && v.Y < threshold && v.Z < threshold
+}
+
+func (v Vec3) Reflect(n Vec3) Vec3 {
+	return v.Sub(n.Mul(2 * v.Dot(n)))
 }

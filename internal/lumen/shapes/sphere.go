@@ -1,24 +1,24 @@
-package lumen
+package shapes
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
+
+	"github.com/jamrig/lumen/internal/lumen/maths"
 )
 
 type Sphere struct {
-	Origin Vec3
+	Origin maths.Vec3
 	Radius float64
 }
 
-func NewSphere(origin Vec3, radius float64) Sphere {
+func NewSphere(origin maths.Vec3, radius float64) Sphere {
 	return Sphere{
 		Origin: origin,
 		Radius: radius,
 	}
 }
 
-func (s Sphere) Hit(r Ray, t Interval) *HitRecord {
+func (s Sphere) Hit(r maths.Ray, t maths.Interval) *maths.Intersection {
 	oc := s.Origin.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
 	h := r.Direction.Dot(oc)
@@ -40,11 +40,7 @@ func (s Sphere) Hit(r Ray, t Interval) *HitRecord {
 	}
 
 	p := r.At(root)
+	hit := maths.NewIntersection(r, p, root, p.Sub(s.Origin).Div(s.Radius))
 
-	return NewHitRecord(p, root, r, p.Sub(s.Origin).Div(s.Radius))
-}
-
-func (s Sphere) String() string {
-	pretty, _ := json.MarshalIndent(s, "", "  ")
-	return fmt.Sprintf("Sphere: %v", string(pretty))
+	return &hit
 }
