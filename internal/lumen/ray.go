@@ -22,10 +22,6 @@ func (r Ray) At(t float64) Vec3 {
 }
 
 func (r Ray) String() string {
-	pretty, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("[ERR] Failed to stringify Ray: %v", err)
-	}
-
+	pretty, _ := json.MarshalIndent(r, "", "  ")
 	return fmt.Sprintf("Ray: %v", string(pretty))
 }

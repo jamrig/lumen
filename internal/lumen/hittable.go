@@ -1,5 +1,10 @@
 package lumen
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type HitRecord struct {
 	P         Vec3
 	T         float64
@@ -32,6 +37,11 @@ type HittableList struct {
 
 func NewHittableList() HittableList {
 	return HittableList{}
+}
+
+func (h HittableList) String() string {
+	pretty, _ := json.MarshalIndent(h, "", "  ")
+	return fmt.Sprintf("HittableList: %v", string(pretty))
 }
 
 func (h *HittableList) Clear() {

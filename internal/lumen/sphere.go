@@ -45,10 +45,6 @@ func (s Sphere) Hit(r Ray, t Interval) *HitRecord {
 }
 
 func (s Sphere) String() string {
-	pretty, err := json.MarshalIndent(s, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("[ERR] Failed to stringify Sphere: %v", err)
-	}
-
+	pretty, _ := json.MarshalIndent(s, "", "  ")
 	return fmt.Sprintf("Sphere: %v", string(pretty))
 }

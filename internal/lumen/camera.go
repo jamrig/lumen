@@ -3,6 +3,7 @@ package lumen
 import (
 	"encoding/json"
 	"fmt"
+	"image"
 	"image/color"
 	"math"
 )
@@ -10,6 +11,8 @@ import (
 type Camera struct {
 	Origin         Vec3
 	FocalLength    float64
+	ImageWidth     int
+	ImageHeight    int
 	ViewportWidth  float64
 	ViewportHeight float64
 	Down           Vec3
@@ -25,6 +28,8 @@ func NewCamera(origin Vec3, focalLength float64, viewportWidth float64, viewport
 	c := Camera{
 		Origin:         origin,
 		FocalLength:    focalLength,
+		ImageWidth:     imageWidth,
+		ImageHeight:    imageHeight,
 		ViewportWidth:  viewportWidth,
 		ViewportHeight: viewportHeight,
 	}
@@ -42,6 +47,18 @@ func NewCamera(origin Vec3, focalLength float64, viewportWidth float64, viewport
 	return c
 }
 
+func (c *Camera) Render(world HittableList) *image.RGBA {
+	img := image.NewRGBA(image.Rect(0, 0, c.ImageWidth, c.ImageHeight))
+
+	for j := range c.ImageHeight {
+		for i := range c.ImageWidth {
+			img.SetRGBA(i, j, c.ColorAtPixel(i, j, world))
+		}
+	}
+
+	return img
+}
+
 func (c *Camera) ColorAtPixel(screenX, screenY int, world HittableList) color.RGBA {
 	pixelCenter := c.ViewPixelStart.Add(c.ViewDeltaRight.Mul(float64(screenX)).Add(c.ViewDeltaDown.Mul(float64(screenY))))
 	rayDirection := pixelCenter.Sub(c.Origin).Unit()
@@ -56,10 +73,6 @@ func (c *Camera) ColorAtPixel(screenX, screenY int, world HittableList) color.RG
 }
 
 func (c Camera) String() string {
-	pretty, err := json.MarshalIndent(c, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("[ERR] Failed to stringify Camera: %v", err)
-	}
-
+	pretty, _ := json.MarshalIndent(c, "", "  ")
 	return fmt.Sprintf("Camera: %v", string(pretty))
 }

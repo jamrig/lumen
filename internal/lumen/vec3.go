@@ -22,11 +22,7 @@ func NewVec3(x, y, z float64) Vec3 {
 }
 
 func (v Vec3) String() string {
-	pretty, err := json.MarshalIndent(v, "", "  ")
-	if err != nil {
-		return fmt.Sprintf("[ERR] Failed to stringify Vec3: %v", err)
-	}
-
+	pretty, _ := json.MarshalIndent(v, "", "  ")
 	return fmt.Sprintf("Vec3: %v", string(pretty))
 }
 

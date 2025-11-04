@@ -1,6 +1,10 @@
 package lumen
 
-import "math"
+import (
+	"encoding/json"
+	"fmt"
+	"math"
+)
 
 type Interval struct {
 	Min float64
@@ -22,14 +26,19 @@ func NewUniverseInterval() Interval {
 	return NewInterval(math.Inf(-1), math.Inf(1))
 }
 
-func (i *Interval) Size() float64 {
+func (i Interval) String() string {
+	pretty, _ := json.MarshalIndent(i, "", "  ")
+	return fmt.Sprintf("Interval: %v", string(pretty))
+}
+
+func (i Interval) Size() float64 {
 	return i.Max - i.Min
 }
 
-func (i *Interval) Contains(n float64) bool {
+func (i Interval) Contains(n float64) bool {
 	return i.Min <= n && n <= i.Max
 }
 
-func (i *Interval) Surrounds(n float64) bool {
+func (i Interval) Surrounds(n float64) bool {
 	return i.Min < n && n < i.Max
 }
