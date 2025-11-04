@@ -18,13 +18,9 @@ func NewVec3(x, y, z float64) Vec3 {
 	}
 }
 
-func NewRandomVec3(min, max float64) Vec3 {
-	return NewVec3(RandomDouble(min, max), RandomDouble(min, max), RandomDouble(min, max))
-}
-
 func NewRandomUnitVec3() Vec3 {
 	for {
-		p := NewRandomVec3(-1, 1)
+		p := NewVec3(RandomDouble(-1, 1), RandomDouble(-1, 1), RandomDouble(-1, 1))
 		lensq := p.LengthSquared()
 		if math.SmallestNonzeroFloat64 < lensq || lensq <= 1 {
 			return p.Div(math.Sqrt(lensq))
@@ -32,13 +28,13 @@ func NewRandomUnitVec3() Vec3 {
 	}
 }
 
-func NewRandomUnitVec3OnHemisphere(normal Vec3) Vec3 {
-	v := NewRandomUnitVec3()
-	if v.Dot(normal) > 0.0 {
-		return v
+func NewRandomUnitDiskVec3() Vec3 {
+	for {
+		p := NewVec3(RandomDouble(-1, 1), RandomDouble(-1, 1), 0)
+		if p.LengthSquared() < 1 {
+			return p
+		}
 	}
-
-	return v.Mul(-1)
 }
 
 func (v Vec3) Add(u Vec3) Vec3 {
