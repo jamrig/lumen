@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"image/color"
+	"math"
 )
 
 type Camera struct {
@@ -41,16 +42,13 @@ func NewCamera(origin Vec3, focalLength float64, viewportWidth float64, viewport
 	return c
 }
 
-func (c *Camera) ColorAtPixel(screenX, screenY int) color.RGBA {
+func (c *Camera) ColorAtPixel(screenX, screenY int, world HittableList) color.RGBA {
 	pixelCenter := c.ViewPixelStart.Add(c.ViewDeltaRight.Mul(float64(screenX)).Add(c.ViewDeltaDown.Mul(float64(screenY))))
 	rayDirection := pixelCenter.Sub(c.Origin).Unit()
 	ray := NewRay(c.Origin, rayDirection)
 
-	t := NewSphere(NewVec3(0, 0, -1), 0.5).Hit(ray)
-
-	if t > 0.0 {
-		n := ray.At(t).Sub(NewVec3(0, 0, -1)).Unit()
-		return n.Add(NewVec3(1, 1, 1)).Mul(0.5).ToRGBA()
+	if record := world.Hit(ray, 0, math.Inf(1)); record != nil {
+		return NewVec3(1, 1, 1).Add(record.Normal).Mul(0.5).ToRGBA()
 	}
 
 	a := 0.5 * (rayDirection.Y + 1.0)

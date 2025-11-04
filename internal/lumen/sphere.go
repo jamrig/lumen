@@ -18,7 +18,7 @@ func NewSphere(origin Vec3, radius float64) Sphere {
 	}
 }
 
-func (s Sphere) Hit(r Ray) float64 {
+func (s Sphere) Hit(r Ray, tMin, tMax float64) *HitRecord {
 	oc := s.Origin.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
 	h := r.Direction.Dot(oc)
@@ -26,10 +26,21 @@ func (s Sphere) Hit(r Ray) float64 {
 	discriminant := h*h - a*c
 
 	if discriminant < 0 {
-		return -1.0
+		return nil
 	}
 
-	return (h - math.Sqrt(discriminant)) / a
+	sqrtD := math.Sqrt(discriminant)
+	root := (h - sqrtD) / a
+	if root <= tMin || root >= tMax {
+		root = (h + sqrtD) / a
+		if root <= tMin || root >= tMax {
+			return nil
+		}
+	}
+
+	p := r.At(root)
+
+	return NewHitRecord(p, root, r, p.Sub(s.Origin).Div(s.Radius))
 }
 
 func (s Sphere) String() string {
