@@ -9,10 +9,12 @@ import (
 )
 
 const aspectRatio = 16.0 / 9.0
-const imageWidth = 800
+const imageWidth = 1000
 const viewportHeight = 2.0
 const focalLength = 1.0
 const samplesPerPixel = 10
+const maxDepth = 50
+const intersectionThreshold = 0.001
 
 type Camera struct {
 	Origin         Vec3
@@ -63,7 +65,7 @@ func (c *Camera) Render(world HittableList) *image.RGBA {
 
 			for range samplesPerPixel {
 				r := c.GetRay(i, j)
-				pixelColor = pixelColor.Add(c.GetRayColor(r, world))
+				pixelColor = pixelColor.Add(c.GetRayColor(r, world, maxDepth))
 			}
 
 			img.SetRGBA(i, j, pixelColor.Div(samplesPerPixel).ToRGBA())
@@ -80,9 +82,14 @@ func (c *Camera) GetRay(i, j int) Ray {
 	return NewRay(c.Origin, pixelSample.Sub(c.Origin))
 }
 
-func (c *Camera) GetRayColor(r Ray, world HittableList) Vec3 {
-	if record := world.Hit(r, NewInterval(0, math.Inf(1))); record != nil {
-		return NewVec3(1, 1, 1).Add(record.Normal).Mul(0.5)
+func (c *Camera) GetRayColor(r Ray, world HittableList, depth int) Vec3 {
+	if depth <= 0 {
+		return NewVec3(0, 0, 0)
+	}
+
+	if record := world.Hit(r, NewInterval(intersectionThreshold, math.Inf(1))); record != nil {
+		bounceDirection := record.Normal.Add(NewRandomUnitVec3())
+		return c.GetRayColor(NewRay(record.P, bounceDirection), world, depth-1).Mul(0.5)
 	}
 
 	a := 0.5 * (r.Direction.Y + 1.0)
