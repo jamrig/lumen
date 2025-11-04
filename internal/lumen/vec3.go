@@ -27,10 +27,12 @@ func (v Vec3) String() string {
 }
 
 func (v Vec3) ToRGBA() color.RGBA {
+	intensity := NewInterval(0.000, 0.999)
+
 	return color.RGBA{
-		R: uint8(v.X * 255),
-		G: uint8(v.Y * 255),
-		B: uint8(v.Z * 255),
+		R: uint8(intensity.Clamp(v.X) * 256),
+		G: uint8(intensity.Clamp(v.Y) * 256),
+		B: uint8(intensity.Clamp(v.Z) * 256),
 		A: 255,
 	}
 }

@@ -4,26 +4,22 @@ import (
 	"fmt"
 	"image/png"
 	"log"
-	"math"
 	"os"
+	"time"
 
 	"github.com/jamrig/lumen/internal/lumen"
 )
 
 func main() {
-	aspectRatio := 16.0 / 9.0
-	imageWidth := 1920
-	imageHeight := int(math.Floor(float64(imageWidth) / aspectRatio))
-
-	camera := lumen.NewCamera(lumen.NewVec3(0, 0, 0), 1, 2.0*(float64(imageWidth)/float64(imageHeight)), 2.0, imageWidth, imageHeight)
-	fmt.Println(camera)
+	camera := lumen.NewCamera()
 
 	world := lumen.NewHittableList()
 	world.Add(lumen.NewSphere(lumen.NewVec3(0, 0, -1), 0.5))
 	world.Add(lumen.NewSphere(lumen.NewVec3(0, -100.5, -1), 100))
-	fmt.Println(world)
 
+	startTime := time.Now()
 	img := camera.Render(world)
+	fmt.Printf("Rendering took %s\n", time.Since(startTime))
 
 	file, err := os.Create("output.png")
 	if err != nil {
