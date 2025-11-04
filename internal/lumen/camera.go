@@ -31,7 +31,7 @@ func NewCamera(origin Vec3, focalLength float64, viewportWidth float64, viewport
 	c.Right = NewVec3(viewportWidth, 0, 0).Unit()
 	c.Down = NewVec3(0, -viewportHeight, 0).Unit()
 
-	c.ViewCenter = c.Origin.Sub(NewVec3(0, 0, -c.FocalLength))
+	c.ViewCenter = c.Origin.Sub(NewVec3(0, 0, c.FocalLength))
 	c.ViewDeltaRight = NewVec3(c.ViewportWidth, 0, 0).Div(float64(imageWidth))
 	c.ViewDeltaDown = NewVec3(0, -c.ViewportHeight, 0).Div(float64(imageHeight))
 
@@ -46,8 +46,11 @@ func (c *Camera) ColorAtPixel(screenX, screenY int) color.RGBA {
 	rayDirection := pixelCenter.Sub(c.Origin).Unit()
 	ray := NewRay(c.Origin, rayDirection)
 
-	if NewSphere(NewVec3(0, 0, -1), 0.5).Hit(ray) {
-		return NewVec3(1, 0, 0).ToRGBA()
+	t := NewSphere(NewVec3(0, 0, -1), 0.5).Hit(ray)
+
+	if t > 0.0 {
+		n := ray.At(t).Sub(NewVec3(0, 0, -1)).Unit()
+		return n.Add(NewVec3(1, 1, 1)).Mul(0.5).ToRGBA()
 	}
 
 	a := 0.5 * (rayDirection.Y + 1.0)
