@@ -11,10 +11,6 @@ import (
 	"github.com/jamrig/lumen/internal/lumen/maths"
 )
 
-const aspectRatio = 16.0 / 9.0
-const imageWidth = 1000
-const samplesPerPixel = 50
-const maxDepth = 50
 const intersectionThreshold = 0.001
 const verticalFOV = 20.0
 const defocusAngle = 0.6
@@ -30,6 +26,8 @@ type Camera struct {
 	ImageHeight          int
 	ViewportWidth        float64
 	ViewportHeight       float64
+	SamplesPerPixel      int
+	MaxDepth             int
 	CameraUp             maths.Vec3
 	CameraRight          maths.Vec3
 	CameraBack           maths.Vec3
@@ -45,11 +43,13 @@ type Camera struct {
 	DefocusDiskVertical  maths.Vec3
 }
 
-func NewCamera() Camera {
+func NewCamera(imageWidth int, aspectRatio float64, samples int, maxDepth int) Camera {
 	c := Camera{
-		Center:      lookFrom,
-		ImageWidth:  imageWidth,
-		ImageHeight: int(math.Floor(float64(imageWidth) / aspectRatio)),
+		Center:          lookFrom,
+		ImageWidth:      imageWidth,
+		ImageHeight:     int(math.Floor(float64(imageWidth) / aspectRatio)),
+		SamplesPerPixel: samples,
+		MaxDepth:        maxDepth,
 	}
 
 	// Viewport
@@ -92,12 +92,12 @@ func (c *Camera) Render(scene *Scene) *image.RGBA {
 		for i := range c.ImageWidth {
 			pixelColor := maths.NewColor(0, 0, 0)
 
-			for range samplesPerPixel {
+			for range c.SamplesPerPixel {
 				r := c.GetRay(i, j)
-				pixelColor = pixelColor.Add(c.GetRayColor(r, scene, maxDepth))
+				pixelColor = pixelColor.Add(c.GetRayColor(r, scene, c.MaxDepth))
 			}
 
-			img.SetRGBA(i, j, pixelColor.Div(samplesPerPixel).ToRGBA())
+			img.SetRGBA(i, j, pixelColor.Div(float64(c.SamplesPerPixel)).ToRGBA())
 		}
 	}
 
@@ -109,21 +109,21 @@ func (c *Camera) Render(scene *Scene) *image.RGBA {
 func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 	startTime := time.Now()
 
-	imgSamples := make([][]maths.Color, samplesPerPixel)
+	imgSamples := make([][]maths.Color, c.SamplesPerPixel)
 
 	wg := sync.WaitGroup{}
-	wg.Add(samplesPerPixel)
+	wg.Add(c.SamplesPerPixel)
 
 	// TODO: change to pool to finish full cycle for each core
 
-	for sample := range samplesPerPixel {
+	for sample := range c.SamplesPerPixel {
 		go func() {
 			img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
 
 			for j := range c.ImageHeight {
 				for i := range c.ImageWidth {
 					r := c.GetRay(i, j)
-					pixelColor := c.GetRayColor(r, scene, maxDepth)
+					pixelColor := c.GetRayColor(r, scene, c.MaxDepth)
 					img[j*c.ImageWidth+i] = pixelColor
 				}
 			}
@@ -150,7 +150,7 @@ func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 
 	for j := range c.ImageHeight {
 		for i := range c.ImageWidth {
-			img.SetRGBA(i, j, combined[j*c.ImageWidth+i].Div(samplesPerPixel).ToRGBA())
+			img.SetRGBA(i, j, combined[j*c.ImageWidth+i].Div(float64(c.SamplesPerPixel)).ToRGBA())
 		}
 	}
 

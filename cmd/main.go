@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"image/png"
 	"log"
 	"os"
+	"runtime"
+	"runtime/pprof"
 
 	"github.com/jamrig/lumen/internal/lumen"
 	"github.com/jamrig/lumen/internal/lumen/material"
@@ -11,8 +14,41 @@ import (
 	"github.com/jamrig/lumen/internal/lumen/shapes"
 )
 
+var samples = flag.Int("samples", 1, "number of sampling rays")
+var aspectRatio = flag.Float64("aspect", 16.0/9.0, "aspect ratio of the render")
+var width = flag.Int("width", 1000, "width of the render")
+var maxDepth = flag.Int("maxdepth", 50, "max ray depth")
+
+var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
+var heapprofile = flag.String("heapprofile", "", "write heap profile to file")
+
 func main() {
-	camera := lumen.NewCamera()
+	flag.Parse()
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
+	if *heapprofile != "" {
+		f, err := os.Create(*heapprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+		runtime.GC()
+		if err := pprof.Lookup("allocs").WriteTo(f, 0); err != nil {
+			log.Fatal("could not write memory profile: ", err)
+		}
+	}
+
+	camera := lumen.NewCamera(*width, *aspectRatio, *samples, *maxDepth)
 
 	// scene
 	scene := lumen.NewScene()
@@ -24,7 +60,6 @@ func main() {
 			center := maths.NewVec3(float64(a)+0.9*maths.RandomDouble(0, 1), 0.2, float64(b)+0.9*maths.RandomDouble(0, 1))
 
 			if (center.Sub(maths.NewVec3(4, 0.2, 0))).Length() > 0.9 {
-				// shared_ptr<material> sphere_material;
 				var mat material.Material
 
 				if chooseMat < 0.8 {
