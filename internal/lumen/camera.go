@@ -5,7 +5,7 @@ import (
 	"image"
 	"math"
 	"math/rand"
-	"sync"
+	"runtime"
 	"time"
 
 	"github.com/jamrig/lumen/internal/lumen/maths"
@@ -106,39 +106,47 @@ func (c *Camera) Render(scene *Scene) *image.RGBA {
 	return img
 }
 
+func (c *Camera) RenderSample(scene *Scene) []maths.Color {
+	img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
+
+	for j := range c.ImageHeight {
+		for i := range c.ImageWidth {
+			r := c.GetRay(i, j)
+			pixelColor := c.GetRayColor(r, scene, c.MaxDepth)
+			img[j*c.ImageWidth+i] = pixelColor
+		}
+	}
+
+	return img
+}
+
 func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 	startTime := time.Now()
 
-	imgSamples := make([][]maths.Color, c.SamplesPerPixel)
+	maxWorkers := runtime.GOMAXPROCS(0)
+	ch := make(chan []maths.Color)
 
-	wg := sync.WaitGroup{}
-	wg.Add(c.SamplesPerPixel)
-
-	// TODO: change to pool to finish full cycle for each core
-
-	for sample := range c.SamplesPerPixel {
+	for range maxWorkers {
 		go func() {
-			img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
-
-			for j := range c.ImageHeight {
-				for i := range c.ImageWidth {
-					r := c.GetRay(i, j)
-					pixelColor := c.GetRayColor(r, scene, c.MaxDepth)
-					img[j*c.ImageWidth+i] = pixelColor
-				}
-			}
-
-			imgSamples[sample] = img
-
-			wg.Done()
+			ch <- c.RenderSample(scene)
 		}()
 	}
 
-	wg.Wait()
-
 	combined := make([]maths.Color, c.ImageWidth*c.ImageHeight)
 
-	for _, sample := range imgSamples {
+	for i := range c.SamplesPerPixel {
+		sample := <-ch
+		samplesDone := i + 1
+		samplesLeft := c.SamplesPerPixel - samplesDone
+		fmt.Printf("\rSamples done %v/%v", samplesDone, c.SamplesPerPixel)
+
+		if samplesLeft >= maxWorkers {
+			go func() {
+				ch <- c.RenderSample(scene)
+			}()
+		}
+
+		// TODO: do in separate thread to not block workers
 		for j := range c.ImageHeight {
 			for i := range c.ImageWidth {
 				combined[j*c.ImageWidth+i] = sample[j*c.ImageWidth+i].Add(combined[j*c.ImageWidth+i])

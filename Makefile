@@ -14,7 +14,7 @@ high_quality:
 	go run cmd/main.go -samples=100 -width=1280
 
 ultra_quality:
-	go run cmd/main.go -samples=500 -width=1920
+	go run cmd/main.go -samples=200 -width=1920
 
 prof:
 	go run cmd/main.go -cpuprofile=prof/cpu.prof -heapprofile=prof/heap.prof
