@@ -1,24 +1,27 @@
 package lumen
 
 import (
+	"fmt"
 	"image"
 	"math"
 	"math/rand"
+	"sync"
+	"time"
 
 	"github.com/jamrig/lumen/internal/lumen/maths"
 )
 
 const aspectRatio = 16.0 / 9.0
 const imageWidth = 1000
-const samplesPerPixel = 100
+const samplesPerPixel = 50
 const maxDepth = 50
 const intersectionThreshold = 0.001
 const verticalFOV = 20.0
-const defocusAngle = 10.0
-const focusDist = 3.4
+const defocusAngle = 0.6
+const focusDist = 10.0
 
-var lookFrom = maths.NewVec3(-2, 2, 1)
-var lookAt = maths.NewVec3(0, 0, -1)
+var lookFrom = maths.NewVec3(13, 2, 3)
+var lookAt = maths.NewVec3(0, 0, 0)
 var viewUp = maths.NewVec3(0, 1, 0)
 
 type Camera struct {
@@ -79,9 +82,13 @@ func NewCamera() Camera {
 }
 
 func (c *Camera) Render(scene *Scene) *image.RGBA {
+	startTime := time.Now()
+
 	img := image.NewRGBA(image.Rect(0, 0, c.ImageWidth, c.ImageHeight))
 
 	for j := range c.ImageHeight {
+		fmt.Printf("\rRendering Line %v/%v", j, c.ImageHeight)
+
 		for i := range c.ImageWidth {
 			pixelColor := maths.NewColor(0, 0, 0)
 
@@ -93,6 +100,61 @@ func (c *Camera) Render(scene *Scene) *image.RGBA {
 			img.SetRGBA(i, j, pixelColor.Div(samplesPerPixel).ToRGBA())
 		}
 	}
+
+	fmt.Printf("\rDone. Took %s to render %v lines\n", time.Since(startTime), c.ImageHeight)
+
+	return img
+}
+
+func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
+	startTime := time.Now()
+
+	imgSamples := make([][]maths.Color, samplesPerPixel)
+
+	wg := sync.WaitGroup{}
+	wg.Add(samplesPerPixel)
+
+	// TODO: change to pool to finish full cycle for each core
+
+	for sample := range samplesPerPixel {
+		go func() {
+			img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
+
+			for j := range c.ImageHeight {
+				for i := range c.ImageWidth {
+					r := c.GetRay(i, j)
+					pixelColor := c.GetRayColor(r, scene, maxDepth)
+					img[j*c.ImageWidth+i] = pixelColor
+				}
+			}
+
+			imgSamples[sample] = img
+
+			wg.Done()
+		}()
+	}
+
+	wg.Wait()
+
+	combined := make([]maths.Color, c.ImageWidth*c.ImageHeight)
+
+	for _, sample := range imgSamples {
+		for j := range c.ImageHeight {
+			for i := range c.ImageWidth {
+				combined[j*c.ImageWidth+i] = sample[j*c.ImageWidth+i].Add(combined[j*c.ImageWidth+i])
+			}
+		}
+	}
+
+	img := image.NewRGBA(image.Rect(0, 0, c.ImageWidth, c.ImageHeight))
+
+	for j := range c.ImageHeight {
+		for i := range c.ImageWidth {
+			img.SetRGBA(i, j, combined[j*c.ImageWidth+i].Div(samplesPerPixel).ToRGBA())
+		}
+	}
+
+	fmt.Printf("\rDone. Took %s to render %v lines\n", time.Since(startTime), c.ImageHeight)
 
 	return img
 }

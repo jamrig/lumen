@@ -1,11 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"image/png"
 	"log"
 	"os"
-	"time"
 
 	"github.com/jamrig/lumen/internal/lumen"
 	"github.com/jamrig/lumen/internal/lumen/material"
@@ -16,24 +14,45 @@ import (
 func main() {
 	camera := lumen.NewCamera()
 
-	// materials
-	materialGround := material.NewLambertianMaterial(maths.NewColor(0.8, 0.8, 0.0))
-	materialCenter := material.NewLambertianMaterial(maths.NewColor(0.1, 0.2, 0.5))
-	materialLeft := material.NewDielectricMaterial(1.5)
-	materialBubble := material.NewDielectricMaterial(1.00 / 1.5)
-	materialRight := material.NewMetalMaterial(maths.NewColor(0.8, 0.6, 0.2), 1.0)
-
 	// scene
 	scene := lumen.NewScene()
-	scene.Add(shapes.NewSphere(maths.NewVec3(0.0, -100.5, -1.0), 100, materialGround))
-	scene.Add(shapes.NewSphere(maths.NewVec3(0.0, 0.0, -1.2), 0.5, materialCenter))
-	scene.Add(shapes.NewSphere(maths.NewVec3(-1.0, 0.0, -1.0), 0.5, materialLeft))
-	scene.Add(shapes.NewSphere(maths.NewVec3(-1.0, 0.0, -1.0), 0.4, materialBubble))
-	scene.Add(shapes.NewSphere(maths.NewVec3(1.0, 0.0, -1.0), 0.5, materialRight))
+	materialGround := material.NewLambertianMaterial(maths.NewColor(0.5, 0.5, 0.5))
+	scene.Add(shapes.NewSphere(maths.NewVec3(0.0, -1000, 0), 1000, materialGround))
+	for a := -11; a < 11; a++ {
+		for b := -11; b < 11; b++ {
+			chooseMat := maths.RandomDouble(0, 1)
+			center := maths.NewVec3(float64(a)+0.9*maths.RandomDouble(0, 1), 0.2, float64(b)+0.9*maths.RandomDouble(0, 1))
 
-	startTime := time.Now()
-	img := camera.Render(scene)
-	fmt.Printf("Rendering took %s\n", time.Since(startTime))
+			if (center.Sub(maths.NewVec3(4, 0.2, 0))).Length() > 0.9 {
+				// shared_ptr<material> sphere_material;
+				var mat material.Material
+
+				if chooseMat < 0.8 {
+					albedo := maths.NewColor(maths.RandomDouble(0, 1), maths.RandomDouble(0, 1), maths.RandomDouble(0, 1))
+					mat = material.NewLambertianMaterial(albedo)
+				} else if chooseMat < 0.95 {
+					albedo := maths.NewColor(maths.RandomDouble(0.5, 1), maths.RandomDouble(0.5, 1), maths.RandomDouble(0.5, 1))
+					fuzz := maths.RandomDouble(0, 0.5)
+					mat = material.NewMetalMaterial(albedo, fuzz)
+				} else {
+					mat = material.NewDielectricMaterial(1.5)
+				}
+
+				scene.Add(shapes.NewSphere(center, 0.2, mat))
+			}
+		}
+	}
+
+	material1 := material.NewDielectricMaterial(1.5)
+	scene.Add(shapes.NewSphere(maths.NewVec3(0, 1, 0), 1.0, material1))
+
+	material2 := material.NewLambertianMaterial(maths.NewColor(0.4, 0.2, 0.1))
+	scene.Add(shapes.NewSphere(maths.NewVec3(-4, 1, 0), 1.0, material2))
+
+	material3 := material.NewMetalMaterial(maths.NewColor(0.7, 0.6, 0.5), 0.0)
+	scene.Add(shapes.NewSphere(maths.NewVec3(4, 1, 0), 1.0, material3))
+
+	img := camera.RenderParallel(scene)
 
 	file, err := os.Create("output.png")
 	if err != nil {
