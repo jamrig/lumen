@@ -18,7 +18,7 @@ func (m LambertianMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay
 		dir = hit.Normal
 	}
 
-	r := maths.NewScatteredRay(maths.NewRay(hit.Point, dir), m.Albedo)
+	r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, dir, hit.Ray.Time), m.Albedo)
 
 	return &r
 }

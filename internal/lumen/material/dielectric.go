@@ -30,11 +30,11 @@ func (m DielectricMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay
 	sinTheta := math.Sqrt(1 - cosTheta*cosTheta)
 
 	if ri*sinTheta > 1 || m.Reflectance(cosTheta, ri) > rand.Float64() {
-		r := maths.NewScatteredRay(maths.NewRay(hit.Point, unit.Reflect(hit.Normal)), attentuate)
+		r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, unit.Reflect(hit.Normal), hit.Ray.Time), attentuate)
 		return &r
 	}
 
-	r := maths.NewScatteredRay(maths.NewRay(hit.Point, unit.Refract(hit.Normal, ri)), attentuate)
+	r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, unit.Refract(hit.Normal, ri), hit.Ray.Time), attentuate)
 
 	return &r
 }

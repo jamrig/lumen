@@ -8,21 +8,30 @@ import (
 )
 
 type Sphere struct {
-	Origin   maths.Vec3
+	Center   maths.Ray
 	Radius   float64
 	Material material.Material
 }
 
 func NewSphere(origin maths.Vec3, radius float64, mat material.Material) Sphere {
 	return Sphere{
-		Origin:   origin,
+		Center:   maths.NewRay(origin, maths.NewVec3(0, 0, 0)),
+		Radius:   radius,
+		Material: mat,
+	}
+}
+
+func NewMovingSphere(origin maths.Vec3, end maths.Vec3, radius float64, mat material.Material) Sphere {
+	return Sphere{
+		Center:   maths.NewRay(origin, end.Sub(origin)),
 		Radius:   radius,
 		Material: mat,
 	}
 }
 
 func (s Sphere) Hit(r maths.Ray, t maths.Interval) *HitResult {
-	oc := s.Origin.Sub(r.Origin)
+	currCenter := s.Center.At(r.Time)
+	oc := currCenter.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
 	h := r.Direction.Dot(oc)
 	c := oc.LengthSquared() - s.Radius*s.Radius
@@ -45,7 +54,7 @@ func (s Sphere) Hit(r maths.Ray, t maths.Interval) *HitResult {
 	p := r.At(root)
 
 	return NewHitResult(
-		maths.NewIntersection(r, p, root, p.Sub(s.Origin).Div(s.Radius)),
+		maths.NewIntersection(r, p, root, p.Sub(currCenter).Div(s.Radius)),
 		s.Material,
 	)
 }

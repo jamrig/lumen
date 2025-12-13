@@ -25,7 +25,7 @@ func (m MetalMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
 		return nil
 	}
 
-	r := maths.NewScatteredRay(maths.NewRay(hit.Point, reflected), m.Albedo)
+	r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, reflected, hit.Ray.Time), m.Albedo)
 
 	return &r
 }

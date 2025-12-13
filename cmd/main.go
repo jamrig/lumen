@@ -60,20 +60,21 @@ func main() {
 			center := maths.NewVec3(float64(a)+0.9*maths.RandomDouble(0, 1), 0.2, float64(b)+0.9*maths.RandomDouble(0, 1))
 
 			if (center.Sub(maths.NewVec3(4, 0.2, 0))).Length() > 0.9 {
-				var mat material.Material
-
 				if chooseMat < 0.8 {
 					albedo := maths.NewColor(maths.RandomDouble(0, 1), maths.RandomDouble(0, 1), maths.RandomDouble(0, 1))
-					mat = material.NewLambertianMaterial(albedo)
+					scene.Add(shapes.NewMovingSphere(
+						center,
+						center.Add(maths.NewVec3(0, maths.RandomDouble(0, 0.5), 0)),
+						0.2,
+						material.NewLambertianMaterial(albedo),
+					))
 				} else if chooseMat < 0.95 {
 					albedo := maths.NewColor(maths.RandomDouble(0.5, 1), maths.RandomDouble(0.5, 1), maths.RandomDouble(0.5, 1))
 					fuzz := maths.RandomDouble(0, 0.5)
-					mat = material.NewMetalMaterial(albedo, fuzz)
+					scene.Add(shapes.NewSphere(center, 0.2, material.NewMetalMaterial(albedo, fuzz)))
 				} else {
-					mat = material.NewDielectricMaterial(1.5)
+					scene.Add(shapes.NewSphere(center, 0.2, material.NewDielectricMaterial(1.5)))
 				}
-
-				scene.Add(shapes.NewSphere(center, 0.2, mat))
 			}
 		}
 	}

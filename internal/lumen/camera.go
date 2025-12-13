@@ -81,31 +81,6 @@ func NewCamera(imageWidth int, aspectRatio float64, samples int, maxDepth int) C
 	return c
 }
 
-func (c *Camera) Render(scene *Scene) *image.RGBA {
-	startTime := time.Now()
-
-	img := image.NewRGBA(image.Rect(0, 0, c.ImageWidth, c.ImageHeight))
-
-	for j := range c.ImageHeight {
-		fmt.Printf("\rRendering Line %v/%v", j, c.ImageHeight)
-
-		for i := range c.ImageWidth {
-			pixelColor := maths.NewColor(0, 0, 0)
-
-			for range c.SamplesPerPixel {
-				r := c.GetRay(i, j)
-				pixelColor = pixelColor.Add(c.GetRayColor(r, scene, c.MaxDepth))
-			}
-
-			img.SetRGBA(i, j, pixelColor.Div(float64(c.SamplesPerPixel)).ToRGBA())
-		}
-	}
-
-	fmt.Printf("\rDone. Took %s to render %v lines\n", time.Since(startTime), c.ImageHeight)
-
-	return img
-}
-
 func (c *Camera) RenderSample(scene *Scene) []maths.Color {
 	img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
 
@@ -177,8 +152,9 @@ func (c *Camera) GetRay(i, j int) maths.Ray {
 
 	offset := maths.NewVec3(rand.Float64()-0.5, rand.Float64()-0.5, 0)
 	pixelSample := c.ViewPixelStart.Add(c.ViewDeltaRight.Mul(float64(i) + offset.X)).Add(c.ViewDeltaDown.Mul(float64(j) + offset.Y))
+	rayTime := maths.RandomDouble(0, 1)
 
-	return maths.NewRay(origin, pixelSample.Sub(origin))
+	return maths.NewRayWithTime(origin, pixelSample.Sub(origin), rayTime)
 }
 
 func (c *Camera) GetRayColor(r maths.Ray, scene *Scene, depth int) maths.Color {
