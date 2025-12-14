@@ -19,4 +19,5 @@ func NewHitResult(i maths.Intersection, m material.Material) *HitResult {
 
 type Hittable interface {
 	Hit(r maths.Ray, t maths.Interval) *HitResult
+	GetBoundingBox() maths.AABB
 }

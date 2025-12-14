@@ -14,8 +14,12 @@ func NewAABB(x, y, z Interval) AABB {
 	}
 }
 
-func NewEmptyAABB() AABB {
-	return AABB{}
+func NewAABBFromAABBs(a, b AABB) AABB {
+	return AABB{
+		X: NewEnclosedInterval(a.X, b.X),
+		Y: NewEnclosedInterval(a.Y, b.Y),
+		Z: NewEnclosedInterval(a.Z, b.Z),
+	}
 }
 
 func NewAABBFromPoints(a, b Vec3) AABB {

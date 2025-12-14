@@ -6,7 +6,8 @@ import (
 )
 
 type Scene struct {
-	Objects []shapes.Hittable
+	Objects     []shapes.Hittable
+	BoundingBox maths.AABB
 }
 
 func NewScene() *Scene {
@@ -19,6 +20,7 @@ func (s *Scene) Clear() {
 
 func (s *Scene) Add(object shapes.Hittable) {
 	s.Objects = append(s.Objects, object)
+	s.BoundingBox = maths.NewAABBFromAABBs(s.BoundingBox, object.GetBoundingBox())
 }
 
 func (s *Scene) Hit(r maths.Ray, t maths.Interval) *shapes.HitResult {

@@ -16,6 +16,23 @@ func NewInterval(min, max float64) Interval {
 	}
 }
 
+func NewEnclosedInterval(a, b Interval) Interval {
+	min := a.Min
+	if a.Min > b.Min {
+		min = b.Min
+	}
+
+	max := a.Max
+	if a.Max < b.Max {
+		min = b.Max
+	}
+
+	return Interval{
+		Min: min,
+		Max: max,
+	}
+}
+
 func NewEmptyInterval() Interval {
 	return NewInterval(math.Inf(1), math.Inf(-1))
 }
