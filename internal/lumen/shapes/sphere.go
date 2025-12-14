@@ -8,16 +8,16 @@ import (
 )
 
 type Sphere struct {
-	Center      maths.Ray
+	Center      *maths.Ray
 	Radius      float64
 	Material    material.Material
-	BoundingBox maths.AABB
+	BoundingBox *maths.AABB
 }
 
-func NewSphere(origin maths.Vec3, radius float64, mat material.Material) Sphere {
+func NewSphere(origin *maths.Vec3, radius float64, mat material.Material) *Sphere {
 	rVec := maths.NewVec3(radius, radius, radius)
 
-	return Sphere{
+	return &Sphere{
 		Center:      maths.NewRay(origin, maths.NewVec3(0, 0, 0)),
 		Radius:      radius,
 		Material:    mat,
@@ -25,11 +25,11 @@ func NewSphere(origin maths.Vec3, radius float64, mat material.Material) Sphere 
 	}
 }
 
-func NewMovingSphere(origin maths.Vec3, end maths.Vec3, radius float64, mat material.Material) Sphere {
+func NewMovingSphere(origin *maths.Vec3, end *maths.Vec3, radius float64, mat material.Material) *Sphere {
 	center := maths.NewRay(origin, end.Sub(origin))
 	rVec := maths.NewVec3(radius, radius, radius)
 
-	return Sphere{
+	return &Sphere{
 		Center:   center,
 		Radius:   radius,
 		Material: mat,
@@ -40,7 +40,7 @@ func NewMovingSphere(origin maths.Vec3, end maths.Vec3, radius float64, mat mate
 	}
 }
 
-func (s Sphere) Hit(r maths.Ray, t maths.Interval) *HitResult {
+func (s *Sphere) Hit(r *maths.Ray, t *maths.Interval) *HitResult {
 	currCenter := s.Center.At(r.Time)
 	oc := currCenter.Sub(r.Origin)
 	a := r.Direction.LengthSquared()
@@ -70,6 +70,6 @@ func (s Sphere) Hit(r maths.Ray, t maths.Interval) *HitResult {
 	)
 }
 
-func (s Sphere) GetBoundingBox() maths.AABB {
+func (s *Sphere) GetBoundingBox() *maths.AABB {
 	return s.BoundingBox
 }

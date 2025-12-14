@@ -11,13 +11,13 @@ type DielectricMaterial struct {
 	RefractionIndex float64
 }
 
-func NewDielectricMaterial(refractionIndex float64) DielectricMaterial {
-	return DielectricMaterial{
+func NewDielectricMaterial(refractionIndex float64) *DielectricMaterial {
+	return &DielectricMaterial{
 		RefractionIndex: refractionIndex,
 	}
 }
 
-func (m DielectricMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
+func (m *DielectricMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
 	ri := m.RefractionIndex
 	attentuate := maths.NewColor(1.0, 1.0, 1.0)
 
@@ -31,15 +31,15 @@ func (m DielectricMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay
 
 	if ri*sinTheta > 1 || m.Reflectance(cosTheta, ri) > rand.Float64() {
 		r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, unit.Reflect(hit.Normal), hit.Ray.Time), attentuate)
-		return &r
+		return r
 	}
 
 	r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, unit.Refract(hit.Normal, ri), hit.Ray.Time), attentuate)
 
-	return &r
+	return r
 }
 
-func (m DielectricMaterial) Reflectance(cos float64, refractionIndex float64) float64 {
+func (m *DielectricMaterial) Reflectance(cos float64, refractionIndex float64) float64 {
 	r0 := (1 - refractionIndex) / (1 + refractionIndex)
 	r0 *= r0
 	return r0 + (1-r0)*math.Pow(1-cos, 5)

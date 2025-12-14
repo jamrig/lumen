@@ -1,31 +1,39 @@
 package maths
 
 type AABB struct {
-	X Interval
-	Y Interval
-	Z Interval
+	X *Interval
+	Y *Interval
+	Z *Interval
 }
 
-func NewAABB(x, y, z Interval) AABB {
-	return AABB{
+func NewAABB(x, y, z *Interval) *AABB {
+	return &AABB{
 		X: x,
 		Y: y,
 		Z: z,
 	}
 }
 
-func NewAABBFromAABBs(a, b AABB) AABB {
-	return AABB{
+func NewEmptyAABB() *AABB {
+	return &AABB{
+		X: NewInterval(0, 0),
+		Y: NewInterval(0, 0),
+		Z: NewInterval(0, 0),
+	}
+}
+
+func NewAABBFromAABBs(a, b *AABB) *AABB {
+	return &AABB{
 		X: NewEnclosedInterval(a.X, b.X),
 		Y: NewEnclosedInterval(a.Y, b.Y),
 		Z: NewEnclosedInterval(a.Z, b.Z),
 	}
 }
 
-func NewAABBFromPoints(a, b Vec3) AABB {
-	var xInterval Interval
-	var yInterval Interval
-	var zInterval Interval
+func NewAABBFromPoints(a, b *Vec3) *AABB {
+	var xInterval *Interval
+	var yInterval *Interval
+	var zInterval *Interval
 
 	if a.X <= b.X {
 		xInterval = NewInterval(a.X, b.X)
@@ -45,14 +53,14 @@ func NewAABBFromPoints(a, b Vec3) AABB {
 		zInterval = NewInterval(b.Z, a.Z)
 	}
 
-	return AABB{
+	return &AABB{
 		X: xInterval,
 		Y: yInterval,
 		Z: zInterval,
 	}
 }
 
-func (a AABB) AxisInterval(n int) Interval {
+func (a *AABB) AxisInterval(n int) *Interval {
 	if n == 1 {
 		return a.Y
 	}
@@ -64,7 +72,7 @@ func (a AABB) AxisInterval(n int) Interval {
 	return a.X
 }
 
-func (a AABB) Hit(r Ray, t Interval) bool {
+func (a *AABB) Hit(r *Ray, t *Interval) bool {
 	tMin := t.Min
 	tMax := t.Max
 

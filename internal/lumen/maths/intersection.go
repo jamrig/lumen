@@ -1,14 +1,14 @@
 package maths
 
 type Intersection struct {
-	Ray       Ray
-	Point     Vec3
+	Ray       *Ray
+	Point     *Vec3
 	T         float64
-	Normal    Vec3
+	Normal    *Vec3
 	FrontFace bool
 }
 
-func NewIntersection(r Ray, p Vec3, t float64, n Vec3) Intersection {
+func NewIntersection(r *Ray, p *Vec3, t float64, n *Vec3) *Intersection {
 	intersection := Intersection{
 		Ray:    r,
 		Point:  p,
@@ -22,5 +22,5 @@ func NewIntersection(r Ray, p Vec3, t float64, n Vec3) Intersection {
 		intersection.Normal = intersection.Normal.Mul(-1.0)
 	}
 
-	return intersection
+	return &intersection
 }

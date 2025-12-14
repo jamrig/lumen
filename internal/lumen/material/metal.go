@@ -3,18 +3,18 @@ package material
 import "github.com/jamrig/lumen/internal/lumen/maths"
 
 type MetalMaterial struct {
-	Albedo maths.Color
+	Albedo *maths.Color
 	Fuzz   float64
 }
 
-func NewMetalMaterial(albedo maths.Color, fuzz float64) MetalMaterial {
-	return MetalMaterial{
+func NewMetalMaterial(albedo *maths.Color, fuzz float64) *MetalMaterial {
+	return &MetalMaterial{
 		Albedo: albedo,
 		Fuzz:   fuzz,
 	}
 }
 
-func (m MetalMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
+func (m *MetalMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
 	reflected := hit.Ray.Direction.Reflect(hit.Normal)
 
 	if m.Fuzz > 0 {
@@ -27,5 +27,5 @@ func (m MetalMaterial) Scatter(hit *maths.Intersection) *maths.ScatteredRay {
 
 	r := maths.NewScatteredRay(maths.NewRayWithTime(hit.Point, reflected, hit.Ray.Time), m.Albedo)
 
-	return &r
+	return r
 }

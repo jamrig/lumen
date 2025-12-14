@@ -7,15 +7,18 @@ import (
 
 type Scene struct {
 	Objects     []shapes.Hittable
-	BoundingBox maths.AABB
+	BoundingBox *maths.AABB
 }
 
 func NewScene() *Scene {
-	return &Scene{}
+	return &Scene{
+		BoundingBox: maths.NewEmptyAABB(),
+	}
 }
 
 func (s *Scene) Clear() {
 	s.Objects = make([]shapes.Hittable, 0)
+	s.BoundingBox = maths.NewEmptyAABB()
 }
 
 func (s *Scene) Add(object shapes.Hittable) {
@@ -23,7 +26,7 @@ func (s *Scene) Add(object shapes.Hittable) {
 	s.BoundingBox = maths.NewAABBFromAABBs(s.BoundingBox, object.GetBoundingBox())
 }
 
-func (s *Scene) Hit(r maths.Ray, t maths.Interval) *shapes.HitResult {
+func (s *Scene) Hit(r *maths.Ray, t *maths.Interval) *shapes.HitResult {
 	closest := maths.NewInterval(t.Min, t.Max)
 	var res *shapes.HitResult
 

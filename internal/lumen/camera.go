@@ -21,26 +21,26 @@ var lookAt = maths.NewVec3(0, 0, 0)
 var viewUp = maths.NewVec3(0, 1, 0)
 
 type Camera struct {
-	Center               maths.Vec3
+	Center               *maths.Vec3
 	ImageWidth           int
 	ImageHeight          int
 	ViewportWidth        float64
 	ViewportHeight       float64
 	SamplesPerPixel      int
 	MaxDepth             int
-	CameraUp             maths.Vec3
-	CameraRight          maths.Vec3
-	CameraBack           maths.Vec3
-	ViewHorizontal       maths.Vec3
-	ViewVertical         maths.Vec3
-	ViewDeltaDown        maths.Vec3
-	ViewDeltaRight       maths.Vec3
-	ViewTopLeft          maths.Vec3
-	ViewPixelStart       maths.Vec3
+	CameraUp             *maths.Vec3
+	CameraRight          *maths.Vec3
+	CameraBack           *maths.Vec3
+	ViewHorizontal       *maths.Vec3
+	ViewVertical         *maths.Vec3
+	ViewDeltaDown        *maths.Vec3
+	ViewDeltaRight       *maths.Vec3
+	ViewTopLeft          *maths.Vec3
+	ViewPixelStart       *maths.Vec3
 	DefocusAngle         float64
 	DefocusRadius        float64
-	DefocusDiskHorizonal maths.Vec3
-	DefocusDiskVertical  maths.Vec3
+	DefocusDiskHorizonal *maths.Vec3
+	DefocusDiskVertical  *maths.Vec3
 }
 
 func NewCamera(imageWidth int, aspectRatio float64, samples int, maxDepth int) Camera {
@@ -81,8 +81,8 @@ func NewCamera(imageWidth int, aspectRatio float64, samples int, maxDepth int) C
 	return c
 }
 
-func (c *Camera) RenderSample(scene *Scene) []maths.Color {
-	img := make([]maths.Color, c.ImageWidth*c.ImageHeight)
+func (c *Camera) RenderSample(scene *Scene) []*maths.Color {
+	img := make([]*maths.Color, c.ImageWidth*c.ImageHeight)
 
 	for j := range c.ImageHeight {
 		for i := range c.ImageWidth {
@@ -99,7 +99,7 @@ func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 	startTime := time.Now()
 
 	maxWorkers := runtime.GOMAXPROCS(0)
-	ch := make(chan []maths.Color)
+	ch := make(chan []*maths.Color)
 
 	for range maxWorkers {
 		go func() {
@@ -107,7 +107,11 @@ func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 		}()
 	}
 
-	combined := make([]maths.Color, c.ImageWidth*c.ImageHeight)
+	combined := make([]*maths.Color, c.ImageWidth*c.ImageHeight)
+
+	for i := range combined {
+		combined[i] = maths.NewColor(0, 0, 0)
+	}
 
 	for i := range c.SamplesPerPixel {
 		sample := <-ch
@@ -142,7 +146,7 @@ func (c *Camera) RenderParallel(scene *Scene) *image.RGBA {
 	return img
 }
 
-func (c *Camera) GetRay(i, j int) maths.Ray {
+func (c *Camera) GetRay(i, j int) *maths.Ray {
 	origin := c.Center
 
 	if c.DefocusAngle > 0 {
@@ -157,13 +161,13 @@ func (c *Camera) GetRay(i, j int) maths.Ray {
 	return maths.NewRayWithTime(origin, pixelSample.Sub(origin), rayTime)
 }
 
-func (c *Camera) GetRayColor(r maths.Ray, scene *Scene, depth int) maths.Color {
+func (c *Camera) GetRayColor(r *maths.Ray, scene *Scene, depth int) *maths.Color {
 	if depth <= 0 {
 		return maths.NewColor(0, 0, 0)
 	}
 
 	if res := scene.Hit(r, maths.NewInterval(intersectionThreshold, math.Inf(1))); res != nil {
-		if scatterRay := res.Material.Scatter(&res.Intersection); scatterRay != nil {
+		if scatterRay := res.Material.Scatter(res.Intersection); scatterRay != nil {
 			return c.GetRayColor(scatterRay.Ray, scene, depth-1).Attenuate(scatterRay.Attenuation)
 		}
 

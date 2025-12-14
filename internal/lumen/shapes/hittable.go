@@ -6,11 +6,11 @@ import (
 )
 
 type HitResult struct {
-	Intersection maths.Intersection
+	Intersection *maths.Intersection
 	Material     material.Material
 }
 
-func NewHitResult(i maths.Intersection, m material.Material) *HitResult {
+func NewHitResult(i *maths.Intersection, m material.Material) *HitResult {
 	return &HitResult{
 		Intersection: i,
 		Material:     m,
@@ -18,6 +18,6 @@ func NewHitResult(i maths.Intersection, m material.Material) *HitResult {
 }
 
 type Hittable interface {
-	Hit(r maths.Ray, t maths.Interval) *HitResult
-	GetBoundingBox() maths.AABB
+	Hit(r *maths.Ray, t *maths.Interval) *HitResult
+	GetBoundingBox() *maths.AABB
 }
