@@ -45,3 +45,7 @@ func (i Interval) Clamp(n float64) float64 {
 	}
 	return n
 }
+
+func (i Interval) Expand(delta float64) Interval {
+	return NewInterval(i.Min-(delta/2), i.Max+(delta/2))
+}

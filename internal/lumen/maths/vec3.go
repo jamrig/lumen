@@ -37,6 +37,18 @@ func NewRandomUnitDiskVec3() Vec3 {
 	}
 }
 
+func (v Vec3) GetAxis(n int) float64 {
+	if n == 1 {
+		return v.Y
+	}
+
+	if n == 2 {
+		return v.Z
+	}
+
+	return v.X
+}
+
 func (v Vec3) Add(u Vec3) Vec3 {
 	return Vec3{
 		X: v.X + u.X,
